@@ -2,13 +2,39 @@
 #include <JuceHeader.h>
 #include <InputUIComponent.h>
 #include <regex>
+#include "juce_hid/juce_hid.h"
 using namespace juce;
+
 class InputUiHolder :public Component
     ,
    private Timer
 {
 public :
     InputUiHolder()
+    {
+
+
+
+        currentDemo4.reset(new InputUIComponentStat1("Input 4/5", 150, 0));
+        currentDemo2.reset(new InputUIComponentStat1("Input 3/2", 0, 0));
+        currentDemo.reset(new InputUIComponentStat1("Virtual 1 / 2", 150, 0));
+        //currentDemo1.reset(new InputUIComponentStat1("Input 1/2", 0, 0));
+        if (currentDemo != nullptr || currentDemo2 != nullptr)
+        {
+
+            addAndMakeVisible(currentDemo.get());
+            //addAndMakeVisible(currentDemo1.get());
+            addAndMakeVisible(currentDemo2.get());
+            // addAndMakeVisible(currentDemo4.get());
+             //startTimerHz(60);
+            resized();
+        }
+
+        setOpaque(true);
+        setSize(300, 330);
+    }
+
+    InputUiHolder(int k)
     {
         
         
@@ -32,7 +58,7 @@ public :
         setSize(300, 330);
     }
 
-    InputUiHolder( int mode,std::string componentName = "")
+    InputUiHolder( int mode,  hid::DeviceIO klopa,std::string componentName = "")
     {        
 
         //juce::String pkasd(sdk);
@@ -136,6 +162,9 @@ public :
             setSize(180, 333);
         }
         //this = newholder;
+        unsigned char data[4] = {0xf0,0x20,0x23,0xf7};
+        size_t datasize = 4;
+        klopa.write(data, datasize);
     }
 
     void paint(Graphics& g) override

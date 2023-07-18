@@ -103,9 +103,9 @@ public:
 	{
 
 
-		inputHolders.add(new InputUiHolder());
+		inputHolders.add(new InputUiHolder(3));
 		addAndMakeVisible(inputHolders.getFirst());
-		InputUiHolder* input2 = new InputUiHolder();
+		InputUiHolder* input2 = new InputUiHolder(3);
 		input2->setBounds(300, 0, 300, 330);
 
 		inputHolders.add(input2);
@@ -190,14 +190,24 @@ public:
 			}
 		}
 
+		auto DevArray = hid::getAllDevicesAvailable();
+		hid::DeviceInfo* HidDevInfo;
+		for (auto index = DevArray.begin(); index != DevArray.end(); index++) {
+			String as = (*index).getProductString();
+			if ((*index).getProductString().contains("STUDIO M") || (*index).getProductString().contains("TITAN")) {
+				HidDevInfo = (index);
 
-
-
+				
+				//HandleHidDeviceMessage(klopa);
+				//threadIo = &klopa;
+			}
+		}
+		hid::DeviceIO klopa = hid::connect(*HidDevInfo);
 		int count = 0;
 		for each (std::string channelName in vChannel)
 		{
 			if (channelName.find("ADAT")) {
-				InputUiHolder* input = new InputUiHolder(2, channelName);
+				InputUiHolder* input = new InputUiHolder(2, klopa,channelName);
 				input->setBounds(0 + count * 75, 0, 75, 333);
 	
 				inputHolders.add(input);
@@ -272,9 +282,9 @@ public:
 	MidiplusControlersCompile_OutPut(/*ControllersComponent& cc,*/ const String& name)
 		: Component(name)
 	{
-		inputHolders.add(new InputUiHolder());
+		inputHolders.add(new InputUiHolder(3));
 		addAndMakeVisible(inputHolders.getFirst());
-		InputUiHolder* input2 = new InputUiHolder();
+		InputUiHolder* input2 = new InputUiHolder(3);
 		input2->setBounds(300, 0, 300, 330);
 		inputHolders.add(input2);
 		addAndMakeVisible(inputHolders.getLast());
@@ -361,12 +371,26 @@ public:
 
 
 
+		auto DevArray = hid::getAllDevicesAvailable();
+		hid::DeviceInfo* HidDevInfo;
+		for (auto index = DevArray.begin(); index != DevArray.end(); index++) {
+			String as = (*index).getProductString();
+			if ((*index).getProductString().contains("STUDIO M") || (*index).getProductString().contains("TITAN")) {
+				HidDevInfo = (index);
+
+
+				//HandleHidDeviceMessage(klopa);
+				//threadIo = &klopa;
+			}
+		}
+		hid::DeviceIO klopa = hid::connect(*HidDevInfo);
+
 #endif //  Juce_Window
 		int count = 0;
 		for each (std::string channelName in vChannel)
 		{
 			if (channelName.find("ADAT")) {
-				InputUiHolder* output = new InputUiHolder(2, channelName);
+				InputUiHolder* output = new InputUiHolder(2, klopa,channelName);
 				output->setBounds(0 + count * 75, 0, 75, 330);
 				inputHolders.add(output);
 				addAndMakeVisible(inputHolders.getLast());
@@ -916,11 +940,11 @@ private:
 			//klopa->disconnect();
 			size_t dataSize = 64;
 			DWORD SLEEPTIME = 1;		
-			unsigned char data1[6] = {0xF0, 0x7E, 0X7F, 0X06, 0X01, 0XF7 };
+			//unsigned char data1[6] = {0xF0, 0x7E, 0X7F, 0X06, 0X01, 0XF7 };
 			int initHid = 0;
 			//(**inputCompile).getInputHolders()->getFirst();
 			while (true) {
-				if (initHid == 0) { threadIo->write(data1, 6); initHid++; }
+				//if (initHid == 0) { threadIo->write(data1, 6); initHid++; }
 				Result result = klopa->readTimeout(data, dataSize, 10000);
 
 				//Result result = klopa->readTimeout(data, dataSize,10000);
