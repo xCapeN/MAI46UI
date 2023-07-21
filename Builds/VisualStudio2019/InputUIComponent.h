@@ -75,12 +75,14 @@ public :
     void setBounsSliderValue(float value) {
         sampleSliderChannel1.get()->setValue(value);
     }
+
+
     //每个Stat都需要设置的drawD
     virtual void drawDemo(Graphics&) = 0;
     //===========================变量=================================================
     double lastRenderStartTime = 0.0, averageTimeMs = 0.0, averageActualFPS = 0.0;
     Font displayFont;
-
+    //std::unique_ptr<SliderListener> sliderListener;
     std::unique_ptr<Slider>  sampleSliderChannel1, sampleSliderChannel2;
     std::unique_ptr<Slider> controlsSliderChannel1, controlsSliderChannel2;
     std::unique_ptr<Slider> sampleBarChannel1, sampleBarChannel2;
@@ -89,6 +91,8 @@ public :
     TextButton* controlButtonChannelD1, controlButtonChannelD2;
     Slider* controlsSliderChannelAll;
     std::unique_ptr<ControlLabelMode01>  cMode01;
+
+
 
 #ifdef  Windows
     //SDK或者endpoint软件
@@ -338,7 +342,11 @@ public:
         positionX = x;
         positionY = y;
         cMode01.reset(new ControlLabelMode01());
-        
+
+        int klad = 0;
+        //sliderListener.reset(new SliderListener(klad));
+
+
         sampleSliderChannel1.reset(new Slider("d"));
         sampleSliderChannel1->setSliderStyle(Slider::SliderStyle::LinearVertical);
         sampleSliderChannel1->setLookAndFeel(cMode01.get());
@@ -346,7 +354,10 @@ public:
         sampleSliderChannel1->setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, false, 0, 0);
         sampleSliderChannel1.get()->setColour(Slider::trackColourId, Colours::lightgrey);
         sampleSliderChannel1.get()->setRange(0, 100, 1.0);
+        //sampleSliderChannel1.get()->addListener(sliderListener.get());
         addAndMakeVisible(sampleSliderChannel1.get());
+
+
 
         sampleSliderChannel2.reset(new Slider("d"));
         sampleSliderChannel2->setLookAndFeel(cMode01.get());
@@ -361,6 +372,8 @@ public:
         controlsSliderChannel1->setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, false, 0, 0);
         controlsSliderChannel1.get()->setColour(Slider::trackColourId, Colours::lightgrey);
         addAndMakeVisible(controlsSliderChannel1.get());
+
+
 
 
         labelMin.reset(new Label("labelMin"));

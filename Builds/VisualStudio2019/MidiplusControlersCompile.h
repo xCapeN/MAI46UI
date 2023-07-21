@@ -6,6 +6,7 @@
 
 
 
+
 #ifdef JUCE_WINDOWS
 // Windows multimedia device
 #include <Mmdeviceapi.h>
@@ -95,6 +96,8 @@
 //    return 0;
 //}
 #endif // JUCE_WINDOWS
+
+
 class MidiplusControlersCompile : public Component
 {
 public:
@@ -103,9 +106,9 @@ public:
 	{
 
 
-		inputHolders.add(new InputUiHolder());
+		inputHolders.add(new InputUiHolder(3));
 		addAndMakeVisible(inputHolders.getFirst());
-		InputUiHolder* input2 = new InputUiHolder();
+		InputUiHolder* input2 = new InputUiHolder(3);
 		input2->setBounds(300, 0, 300, 330);
 
 		inputHolders.add(input2);
@@ -167,8 +170,9 @@ public:
 	MidiplusControlersCompile(/*ControllersComponent& cc,*/ const String& name, std::vector<IMMDevice*> inputDevices)
 		: Component(name)
 	{
+		//sharedHidConnector.AddData
 		std::vector<std::string> vString;
-
+		//hidConnectorPtr = compileHidConnectorPtr;
 		HRESULT hr;
 		PROPVARIANT proName;
 		IPropertyStore* pPropertyStore = NULL;
@@ -190,16 +194,26 @@ public:
 			}
 		}
 
+		auto DevArray = hid::getAllDevicesAvailable();
+		hid::DeviceInfo* HidDevInfo;
+		for (auto index = DevArray.begin(); index != DevArray.end(); index++) {
+			String as = (*index).getProductString();
+			if ((*index).getProductString().contains("STUDIO M") || (*index).getProductString().contains("TITAN")) {
+				HidDevInfo = (index);
 
-
-
+				
+				//HandleHidDeviceMessage(klopa);
+				//threadIo = &klopa;
+			}
+		}
+		hid::DeviceIO klopa = hid::connect(*HidDevInfo);
 		int count = 0;
 		for each (std::string channelName in vChannel)
 		{
 			if (channelName.find("ADAT")) {
-				InputUiHolder* input = new InputUiHolder(2, channelName);
+				InputUiHolder* input = new InputUiHolder(2, klopa,channelName);
 				input->setBounds(0 + count * 75, 0, 75, 333);
-	
+				input->setHidConnectorPtr(hidConnectorPtr);
 				inputHolders.add(input);
 				
 				addAndMakeVisible(inputHolders.getLast());
@@ -256,6 +270,7 @@ public:
 	}
 	
 private:
+	HidConnector* hidConnectorPtr;
 	OwnedArray<InputUiHolder> inputHolders;
 	///
 ///这里先自定义一个数组来保存顺序
@@ -272,9 +287,9 @@ public:
 	MidiplusControlersCompile_OutPut(/*ControllersComponent& cc,*/ const String& name)
 		: Component(name)
 	{
-		inputHolders.add(new InputUiHolder());
+		inputHolders.add(new InputUiHolder(3));
 		addAndMakeVisible(inputHolders.getFirst());
-		InputUiHolder* input2 = new InputUiHolder();
+		InputUiHolder* input2 = new InputUiHolder(3);
 		input2->setBounds(300, 0, 300, 330);
 		inputHolders.add(input2);
 		addAndMakeVisible(inputHolders.getLast());
@@ -361,12 +376,26 @@ public:
 
 
 
+		auto DevArray = hid::getAllDevicesAvailable();
+		hid::DeviceInfo* HidDevInfo;
+		for (auto index = DevArray.begin(); index != DevArray.end(); index++) {
+			String as = (*index).getProductString();
+			if ((*index).getProductString().contains("STUDIO M") || (*index).getProductString().contains("TITAN")) {
+				HidDevInfo = (index);
+
+
+				//HandleHidDeviceMessage(klopa);
+				//threadIo = &klopa;
+			}
+		}
+		hid::DeviceIO klopa = hid::connect(*HidDevInfo);
+
 #endif //  Juce_Window
 		int count = 0;
 		for each (std::string channelName in vChannel)
 		{
 			if (channelName.find("ADAT")) {
-				InputUiHolder* output = new InputUiHolder(2, channelName);
+				InputUiHolder* output = new InputUiHolder(2, klopa,channelName);
 				output->setBounds(0 + count * 75, 0, 75, 330);
 				inputHolders.add(output);
 				addAndMakeVisible(inputHolders.getLast());
@@ -630,7 +659,8 @@ public:
 		}
 
 #endif
-
+		//hidConnector = HidConnector();
+		//hidConnectorPtr = &hidConnector;
 		BorderSize<int> p = { 1,1,1,1 };
 		Font pf = Font(12.0f);
 		labelMixerTitle.reset(new Label("title"));
@@ -845,6 +875,10 @@ public:
 		//    drawDemo(g);
 		//}
 	}
+
+	int* getslidervalue() {
+		return threadHidListener.get()->getsliders();
+	}
 private:
 	//OwnedArray<InputUiHolder> inputHolders;
 	std::unique_ptr<Label> labelMixerTitle;
@@ -878,6 +912,7 @@ private:
 		) : Thread(threadName, threadStackSize) {
 			hardwareOutputUIs = oa;
 			inputCompile = inputcompile;
+			//quoteHidConnectorPtr = hidConnectorPtr;
 		}
 
 		void run() override {
@@ -907,20 +942,36 @@ private:
 			DWORD SLEEPTIME = 1;
 			HandleHidDeviceMessage(threadIo);
 		}
+
+		int* getsliders() {
+			return slidervalue;
+		}
 		int pk = 1;
 	private:
 		hid::DeviceIO* threadIo;
+		//HidConnector* quoteHidConnectorPtr;
 
 		void HandleHidDeviceMessage(hid::DeviceIO* klopa ) {
 			unsigned char data[64];
 			//klopa->disconnect();
 			size_t dataSize = 64;
 			DWORD SLEEPTIME = 1;		
-			unsigned char data1[6] = {0xF0, 0x7E, 0X7F, 0X06, 0X01, 0XF7 };
+			
+			unsigned char data2[6] = {0xF0, 0x7E, 0X7F, 0X06, 0X01, 0XF7 };
 			int initHid = 0;
+			HidConnector::getInstance()->AddData(0, buttonData);
+			HidConnector::getInstance()->AddData(1, sliderData);
+			for (int i = 2; i < 8; i++) {
+				//int  data1[1] = {i};
+				//int  data2[2] = { i };
+				std::vector<unsigned char> nullv;
+				HidConnector::getInstance()->AddData(i, nullv);
+			}
+			//hidConnectorPtr = &hidConnector;
 			//(**inputCompile).getInputHolders()->getFirst();
+			klopa->write(data2, 6);
 			while (true) {
-				if (initHid == 0) { threadIo->write(data1, 6); initHid++; }
+				//if (initHid == 0) { threadIo->write(data1, 6); initHid++; }
 				Result result = klopa->readTimeout(data, dataSize, 10000);
 
 				//Result result = klopa->readTimeout(data, dataSize,10000);
@@ -937,6 +988,37 @@ private:
 				}
 				else {
 					SLEEPTIME = 1;
+					switch (data[4]) {
+					case 0x21: {
+						buttonData.clear();
+						buttonData.reserve(64);
+						buttonData.resize(64);
+						memcpy(&buttonData[0], data, 64 * sizeof(unsigned char));
+					}
+							 break;
+					case 0x22: {
+						sliderData.clear();
+						sliderData.reserve(64);
+						sliderData.resize(64);
+						memcpy(&sliderData[0], data, 64 * sizeof(unsigned char));
+						//std::copy(std::begin(data), std::end(data), std::begin(sliderData));
+ }
+							 break;
+					case 0x23: {
+
+					}
+							 break;
+					case 0x24: {}
+							 break;
+					case 0x25: { }
+							 break;
+					case 0x26: {}
+							 break;
+					case 0x27: {}
+							 break;
+					case 0x28: { }
+							 break;
+					}
 					dataDeal(data);
 				}
 				
@@ -961,12 +1043,26 @@ private:
 			std::vector<byte>* selectedStatus;
 			switch (data[4]) {
 			case 0x21: {
+				HidConnector::getInstance()->AddData(0, buttonData);
+				//auto pjl = (HidConnector::getInstance()->GetLinkData(0));
+
 				selectedStatus = &buttonStatus;
+				//(*hidConnectorPtr)
+				//quoteHidConnectorPtr->AddData(0x21, data);
 				statusKey[0] = 1;
 			}
 					 break;
 			case 0x22: {
 				selectedStatus = &sliderStatus;
+				//data[63];
+				//std::copy(std::begin(data), std::end(data), std::begin(sliderData));
+				HidConnector::getInstance()->AddData(1, sliderData);
+				//int pk = HidConnector::getInstance()->GetLength();
+				
+				//pk = HidConnector::getInstance()->GetLength();
+				//quoteHidConnectorPtr->AddData(0x22, data);
+				// 
+				//sharedHidConnector.AddData(0x22, data);
 				statusKey[1] = 1; }
 					 break;
 			case 0x23: {
@@ -1012,7 +1108,7 @@ private:
 				}
 			}break;
 			case 1: {
-				int slidervalue[10];
+				
 				if (sliderStatus.at(6) == 0x14)
 				{
 					for (int time = 0; time < 10; time++) {
@@ -1040,7 +1136,8 @@ private:
 							}
 						}
 					}
-
+					//HidConnector::getInstance()->AddData(1, slidervalue);
+					//HidConnector::getInstance()->GetLinkData(1);
 					int k = 0;
 				}
 			}break;
@@ -1120,6 +1217,15 @@ private:
 		OwnedArray<InputUiHolder>* inputHolders;
 		std::vector<int> inindex;
 
+		/// <summary>
+		///保存数字 
+		/// </summary>
+		int slidervalue[10];
+
+		std::vector<unsigned char>  buttonData;
+		std::vector<unsigned char>  sliderData;
+
+
 		std::unique_ptr< MidiplusControlersCompile>* inputCompile;
 		//std::unique_ptr< MidiplusControlersCompile_OutPut> inputCompile2;
 		int statusKey[8] = {0,0,0,0,0,0,0,0};
@@ -1177,8 +1283,8 @@ private:
 	}
 
 
-
-
+	//HidConnector hidConnector;
+	//HidConnector * hidConnectorPtr;
 	std::unique_ptr< ThreadSampleListener> threadSampleListener;
 	std::unique_ptr< ThreadHidListener> threadHidListener;
 	hid::DeviceInfo* currentDevice;

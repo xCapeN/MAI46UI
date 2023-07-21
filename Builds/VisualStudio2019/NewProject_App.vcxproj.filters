@@ -2124,6 +2124,7 @@
     <ClCompile Include="..\..\juce_hid\juce_hid.cpp">
       <Filter>NewProject\Source\juce_hid</Filter>
     </ClCompile>
+    <ClCompile Include="HidConnector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="UIExtendButtonListener.h">
@@ -4163,6 +4164,7 @@
     <ClInclude Include="..\..\juce_hid\juce_hid.h">
       <Filter>NewProject\Source\juce_hid</Filter>
     </ClInclude>
+    <ClInclude Include="HidConnector.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="imagesource\ButtonLinkNormal.png">

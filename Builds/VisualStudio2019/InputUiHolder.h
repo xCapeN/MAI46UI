@@ -2,13 +2,44 @@
 #include <JuceHeader.h>
 #include <InputUIComponent.h>
 #include <regex>
+#include "juce_hid/juce_hid.h"
+//#ifndef  HConnector
+//
+//#endif
+#include "HidConnector.h"
+
 using namespace juce;
+//static HidConnector   sharedHidConnector;
 class InputUiHolder :public Component
     ,
    private Timer
 {
 public :
     InputUiHolder()
+    {
+
+
+
+        currentDemo4.reset(new InputUIComponentStat1("Input 4/5", 150, 0));
+        currentDemo2.reset(new InputUIComponentStat1("Input 3/2", 0, 0));
+        currentDemo.reset(new InputUIComponentStat1("Virtual 1 / 2", 150, 0));
+        //currentDemo1.reset(new InputUIComponentStat1("Input 1/2", 0, 0));
+        if (currentDemo != nullptr || currentDemo2 != nullptr)
+        {
+
+            addAndMakeVisible(currentDemo.get());
+            //addAndMakeVisible(currentDemo1.get());
+            addAndMakeVisible(currentDemo2.get());
+            // addAndMakeVisible(currentDemo4.get());
+             //startTimerHz(60);
+            resized();
+        }
+
+        setOpaque(true);
+        setSize(300, 330);
+    }
+
+    InputUiHolder(int k)
     {
         
         
@@ -32,15 +63,22 @@ public :
         setSize(300, 330);
     }
 
-    InputUiHolder( int mode,std::string componentName = "")
+    InputUiHolder( int mode,  hid::DeviceIO klopa,std::string componentName = "")
     {        
-
+        //sharedHidConnector = HidConnector();
         //juce::String pkasd(sdk);
         //if (pkasd == "") {
         //    pkasd = "Virtual 1 / 2";
         //}
         //OpenButtonListener* opButtonListener = new OpenButtonListener();
-        opButtonListener.reset(new OpenButtonListener(klad));
+        opButtonListener.reset(new OpenButtonListener(klad,holderHidConnectorPtr));
+        //sliderListener.reset(new SliderListener(klad));
+        int pk = HidConnector::getInstance()->GetLength();
+        unsigned char* tc ;
+
+        //HidConnector::getInstance()->AddData(1, tc);
+
+
         cMode01.reset(new ControlLabelMode01());
         juce::String pkasd(componentName);
         if(pkasd == "") pkasd = "Virtual 1 / 2";
@@ -136,6 +174,10 @@ public :
             setSize(180, 333);
         }
         //this = newholder;
+        unsigned char data[4] = {0xf0,0x20,0x23,0xf7};
+        size_t datasize = 4;
+        klopa.write(data, datasize);
+        //klopa.disconnect();
     }
 
     void paint(Graphics& g) override
@@ -376,15 +418,28 @@ public :
     class OpenButtonListener : public Button::Listener {
     public:
         OpenButtonListener() = default;
-        OpenButtonListener(int& stage) {
+        OpenButtonListener(int& stage , HidConnector*& holderHidConnectorPtr) {
             parentstage = stage;
+            hidConnectorPtr = holderHidConnectorPtr;
         };
         //UIExtendButtonListener(const String& name) ;
         //void UIExtendButtonListener::buttonClicked(juce::Button*) override;
 
         void buttonClicked(Button* btn) override {
             parentstage++;
+            //sharedHidConnector = HidConnector();
+            //int kl = sharedHidConnector->GetLength();
+            //pk = HidConnector::getInstance()->GetLength();
+            unsigned char arraydata[64];
+            auto pdata =  HidConnector::getInstance()->GetLinkData(1);
+            int sum1 = 0;
+            for (auto index = pdata.begin(); index != pdata.end(); index++) {
+                sum1 = *index;
+                int sum2 = 0;
+            }
+            
 
+            int pk = HidConnector::getInstance()->GetLength();
             iph = (InputUiHolder*)btn->getParentComponent();
             int flag = iph->checkLinkAndOpen(btn->getName());
             iph->setDemo(flag);
@@ -394,10 +449,65 @@ public :
             int ksadli = 0;
         };
         int parentstage = 0;
+        
+        InputUiHolder* iph;
+        HidConnector* hidConnectorPtr;
+    };
+
+
+    class SliderListener : public Slider::Listener {
+    public:
+        SliderListener() = default;
+        SliderListener(int& stage) {
+            parentstage = stage;
+        };
+        //UIExtendButtonListener(const String& name) ;
+        //void UIExtendButtonListener::buttonClicked(juce::Button*) override;
+
+        void sliderValueChanged(Slider* btn) override {
+            parentstage++;
+
+            iph = (InputUiHolder*)btn->getParentComponent();
+            // ?????????
+            //((MidiplusControlersCompile_ALL*)(iph->
+            //    getParentComponent()->getParentComponent()))->getslidervalue();
+
+        };
+        //void buttonStateChanged(Button*) override {
+        //    int ksadli = 0;
+        //};
+        int parentstage = 0;
         InputUiHolder* iph;
     };
+    //class SliderListener : public Slider::Listener {
+    //public:
+    //    SliderListener() = default;
+    //    SliderListener(int& stage) {
+    //        parentstage = stage;
+    //    };
+    //    //UIExtendButtonListener(const String& name) ;
+    //    //void UIExtendButtonListener::buttonClicked(juce::Button*) override;
+
+    //    void sliderValueChanged(Slider* btn) override {
+    //        parentstage++;
+
+    //        iph = (InputUiHolder*)btn->getParentComponent();
+    //        ((MidiplusControlersCompile_ALL*)(iph->getParentComponent()->getParentComponent()))->getslidervalue();
+
+    //    };
+    //    //void buttonStateChanged(Button*) override {
+    //    //    int ksadli = 0;
+    //    //};
+    //    int parentstage = 0;
+    //    InputUiHolder* iph;
+    //};
+
+    void setHidConnectorPtr(HidConnector*& hidConnectorPtr) {
+        holderHidConnectorPtr = hidConnectorPtr;
+    }
 private :
    // InputUIComponent* currentDemo = nullptr;
+    HidConnector* holderHidConnectorPtr;
     InputUIComponentContainer* ddaw; 
     std::unique_ptr<InputUIComponentContainer> currentDemo;
     //std::unique_ptr<InputUIComponentContainer> currentDemo1;
@@ -410,6 +520,7 @@ private :
     std::unique_ptr<Slider> testSlider1;
     std::unique_ptr<ControlLabelMode01>  cMode01;
     std::unique_ptr<OpenButtonListener>  opButtonListener;
+    //std::unique_ptr<SliderListener> sliderListener;
 
     std::unique_ptr<ImageButton> openButton;
     std::unique_ptr<ImageButton> closeButton;

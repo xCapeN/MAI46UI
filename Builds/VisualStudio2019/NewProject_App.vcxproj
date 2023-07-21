@@ -136,6 +136,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\juce_hid\juce_hid.cpp" />
+    <ClCompile Include="HidConnector.cpp" />
     <ClCompile Include="UIExtendButtonListener.cpp" />
     <ClCompile Include="DriverOutputUI.cpp" />
     <ClCompile Include="ExtendDetailButton.cpp" />
@@ -1854,6 +1855,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\juce_hid\juce_hid.h" />
+    <ClInclude Include="HidConnector.h" />
     <ClInclude Include="UIExtendButtonListener.h" />
     <ClInclude Include="DriverOutputUI.h" />
     <ClInclude Include="ExtendDetailButton.h" />
