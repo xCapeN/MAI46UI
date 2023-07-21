@@ -3,6 +3,7 @@
 #include <InputUIComponent.h>
 #include <regex>
 #include "juce_hid/juce_hid.h"
+<<<<<<< HEAD
 //#ifndef  HConnector
 //
 //#endif
@@ -10,6 +11,10 @@
 
 using namespace juce;
 //static HidConnector   sharedHidConnector;
+=======
+using namespace juce;
+
+>>>>>>> 44e2230c5eb50616724c90080b54f9fc4a119f44
 class InputUiHolder :public Component
     ,
    private Timer
@@ -177,7 +182,10 @@ public :
         unsigned char data[4] = {0xf0,0x20,0x23,0xf7};
         size_t datasize = 4;
         klopa.write(data, datasize);
+<<<<<<< HEAD
         //klopa.disconnect();
+=======
+>>>>>>> 44e2230c5eb50616724c90080b54f9fc4a119f44
     }
 
     void paint(Graphics& g) override

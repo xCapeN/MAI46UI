@@ -956,8 +956,12 @@ private:
 			//klopa->disconnect();
 			size_t dataSize = 64;
 			DWORD SLEEPTIME = 1;		
+<<<<<<< HEAD
 			
 			unsigned char data2[6] = {0xF0, 0x7E, 0X7F, 0X06, 0X01, 0XF7 };
+=======
+			//unsigned char data1[6] = {0xF0, 0x7E, 0X7F, 0X06, 0X01, 0XF7 };
+>>>>>>> 44e2230c5eb50616724c90080b54f9fc4a119f44
 			int initHid = 0;
 			HidConnector::getInstance()->AddData(0, buttonData);
 			HidConnector::getInstance()->AddData(1, sliderData);
